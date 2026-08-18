@@ -129,6 +129,7 @@ export default function Dashboard() {
     const [showQrEditModal, setShowQrEditModal]       = useState(false);
     const [qrEditTarget, setQrEditTarget]             = useState(null);
     const [qrEditValue, setQrEditValue]               = useState('');
+    const [pendingImage, setPendingImage]             = useState(null);
 
     // Filters
     const [searchBarang, setSearchBarang]         = useState('');
@@ -595,9 +596,34 @@ export default function Dashboard() {
                                 <span className="text-white">Detail Barang</span>
                             </div>
                             <DarkCard className="p-6 md:p-8 flex flex-col md:flex-row gap-8">
-                                <div className="w-full md:w-5/12 rounded-2xl flex items-center justify-center p-4 min-h-[260px]"
+                                <div className="w-full md:w-5/12 rounded-2xl flex flex-col items-center justify-center p-4 min-h-[260px] gap-3"
                                     style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
                                     <img src={item.image} alt={item.nama_barang} className="max-h-52 max-w-full rounded-xl object-cover" />
+                                    {userRole === 'admin' && (
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                const inp = document.createElement('input');
+                                                inp.type = 'file';
+                                                inp.accept = 'image/*';
+                                                inp.onchange = (ev) => {
+                                                    const file = ev.target.files[0];
+                                                    if (file) {
+                                                        const url = URL.createObjectURL(file);
+                                                        setBarangList(prev => prev.map(b => b.id === item.id ? { ...b, image: url } : b));
+                                                    }
+                                                };
+                                                inp.click();
+                                            }}
+                                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-semibold cursor-pointer hover:brightness-110 transition-all"
+                                            style={{ background: 'rgba(124,58,237,0.2)', border: '1px solid rgba(124,58,237,0.3)', color: '#a78bfa' }}
+                                        >
+                                            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            </svg>
+                                            Ganti Gambar
+                                        </button>
+                                    )}
                                 </div>
                                 <div className="flex-1 space-y-5">
                                     <div>
@@ -1016,29 +1042,101 @@ export default function Dashboard() {
                             <form onSubmit={e => {
                                 e.preventDefault();
                                 const d = Object.fromEntries(new FormData(e.target));
+                                const imgSrc = pendingImage || (editBarangData?.image) || 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=500&auto=format&fit=crop&q=60';
                                 if (editBarangData) {
-                                    setBarangList(prev => prev.map(b => b.id === editBarangData.id ? { ...b, ...d, stok: parseInt(d.stok) || b.stok } : b));
+                                    setBarangList(prev => prev.map(b => b.id === editBarangData.id ? { ...b, ...d, stok: parseInt(d.stok) || b.stok, image: imgSrc } : b));
                                 } else {
                                     const newId = Math.max(...barangList.map(b => b.id)) + 1;
                                     const kode = `BRG-${String(newId).padStart(3, '0')}`;
-                                    setBarangList(prev => [...prev, { id: newId, kode_barang: kode, qr_content: kode, ...d, stok: parseInt(d.stok) || 1, image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=500&auto=format&fit=crop&q=60' }]);
+                                    setBarangList(prev => [...prev, { id: newId, kode_barang: kode, qr_content: kode, ...d, stok: parseInt(d.stok) || 1, status: 'tersedia', detail: d.detail || '', image: imgSrc }]);
                                 }
+                                setPendingImage(null);
                                 setShowAddBarangModal(false);
                             }} className="space-y-4">
-                                {[
-                                    { name: 'nama_barang', label: 'Nama Barang', type: 'text', ph: 'Nama barang', def: editBarangData?.nama_barang },
-                                    { name: 'kategori', label: 'Kategori', type: 'text', ph: 'Kategori', def: editBarangData?.kategori },
-                                    { name: 'lokasi', label: 'Lokasi', type: 'text', ph: 'Lokasi', def: editBarangData?.lokasi },
-                                    { name: 'stok', label: 'Stok', type: 'number', ph: 'Jumlah stok', def: editBarangData?.stok },
-                                    { name: 'kondisi', label: 'Kondisi', type: 'text', ph: 'Baik / Rusak Ringan / dst.', def: editBarangData?.kondisi },
-                                ].map(f => (
-                                    <div key={f.name} className="space-y-1.5">
-                                        <label className="text-[11px] font-bold uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.4)' }}>{f.label}</label>
-                                        <input required type={f.type} name={f.name} placeholder={f.ph} defaultValue={f.def}
-                                            className="w-full px-4 py-2.5 rounded-xl text-[13px] font-medium focus:outline-none"
-                                            style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', color: 'white' }} />
+                                {/* Nama Barang */}
+                                <div className="space-y-1.5">
+                                    <label className="text-[11px] font-bold uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.4)' }}>Nama Barang</label>
+                                    <input required type="text" name="nama_barang" placeholder="Nama barang" defaultValue={editBarangData?.nama_barang}
+                                        className="w-full px-4 py-2.5 rounded-xl text-[13px] font-medium focus:outline-none"
+                                        style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', color: 'white' }} />
+                                </div>
+
+                                {/* Kategori � dropdown */}
+                                <div className="space-y-1.5">
+                                    <label className="text-[11px] font-bold uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.4)' }}>Kategori</label>
+                                    <select required name="kategori" defaultValue={editBarangData?.kategori || ''}
+                                        className="w-full px-4 py-2.5 rounded-xl text-[13px] font-medium focus:outline-none cursor-pointer"
+                                        style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', color: 'white' }}>
+                                        <option value="" disabled style={{ background: '#1a1830', color: 'rgba(255,255,255,0.35)' }}>-- Pilih Kategori --</option>
+                                        {kategoriList.map(k => (
+                                            <option key={k} value={k} style={{ background: '#1a1830', color: 'white' }}>{k}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                {/* Lokasi */}
+                                <div className="space-y-1.5">
+                                    <label className="text-[11px] font-bold uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.4)' }}>Lokasi</label>
+                                    <input required type="text" name="lokasi" placeholder="Lokasi" defaultValue={editBarangData?.lokasi}
+                                        className="w-full px-4 py-2.5 rounded-xl text-[13px] font-medium focus:outline-none"
+                                        style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', color: 'white' }} />
+                                </div>
+
+                                {/* Stok */}
+                                <div className="space-y-1.5">
+                                    <label className="text-[11px] font-bold uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.4)' }}>Stok</label>
+                                    <input required type="number" name="stok" placeholder="Jumlah stok" defaultValue={editBarangData?.stok}
+                                        className="w-full px-4 py-2.5 rounded-xl text-[13px] font-medium focus:outline-none"
+                                        style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', color: 'white' }} />
+                                </div>
+
+                                {/* Kondisi */}
+                                <div className="space-y-1.5">
+                                    <label className="text-[11px] font-bold uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.4)' }}>Kondisi</label>
+                                    <input required type="text" name="kondisi" placeholder="Baik / Rusak Ringan / dst." defaultValue={editBarangData?.kondisi}
+                                        className="w-full px-4 py-2.5 rounded-xl text-[13px] font-medium focus:outline-none"
+                                        style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', color: 'white' }} />
+                                </div>
+
+                                {/* Gambar Barang */}
+                                <div className="space-y-1.5">
+                                    <label className="text-[11px] font-bold uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.4)' }}>Gambar Barang</label>
+                                    <div className="flex items-center gap-3">
+                                        {(pendingImage || editBarangData?.image) && (
+                                            <img
+                                                src={pendingImage || editBarangData?.image}
+                                                alt="preview"
+                                                className="w-16 h-16 rounded-xl object-cover flex-shrink-0"
+                                                style={{ border: '1px solid rgba(255,255,255,0.1)' }}
+                                            />
+                                        )}
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                const inp = document.createElement('input');
+                                                inp.type = 'file';
+                                                inp.accept = 'image/*';
+                                                inp.onchange = (ev) => {
+                                                    const file = ev.target.files[0];
+                                                    if (file) setPendingImage(URL.createObjectURL(file));
+                                                };
+                                                inp.click();
+                                            }}
+                                            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[12px] font-semibold cursor-pointer hover:brightness-110 transition-all"
+                                            style={{ background: 'rgba(124,58,237,0.2)', border: '1px solid rgba(124,58,237,0.3)', color: '#a78bfa' }}
+                                        >
+                                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            </svg>
+                                            {pendingImage || editBarangData?.image ? 'Ganti Gambar' : 'Pilih Gambar'}
+                                        </button>
+                                        {pendingImage && (
+                                            <button type="button" onClick={() => setPendingImage(null)}
+                                                className="text-[11px] font-bold cursor-pointer" style={{ color: '#f87171' }}>Reset</button>
+                                        )}
                                     </div>
-                                ))}
+                                </div>
+
                                 <div className="flex gap-3 pt-1">
                                     <button type="button" onClick={() => setShowAddBarangModal(false)}
                                         className="flex-1 py-2.5 rounded-xl font-bold text-[13px] cursor-pointer hover:bg-white/10 transition-colors"

@@ -99,14 +99,14 @@ export default function Dashboard() {
 
     const [barangList, setBarangList] = useState([
         { id: 1, kode_barang: 'BRG-001', qr_content: 'BRG-001', nama_barang: 'Laptop ThinkPad X1 Carbon', kategori: 'Elektronik', lokasi: 'Ruang IT', status: 'tersedia', kondisi: 'Baik', stok: 15, detail: 'Intel i7, 16GB RAM, 512GB SSD', image: 'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=500&auto=format&fit=crop&q=60' },
-        { id: 2, kode_barang: 'BRG-002', qr_content: 'BRG-002', nama_barang: 'Meja Kerja Ergonomis', kategori: 'Mebel', lokasi: 'Lantai 2', status: 'tersedia', kondisi: 'Baik', stok: 30, detail: 'Meja adjustable height 120x60cm', image: 'https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?w=500&auto=format&fit=crop&q=60' },
+        { id: 2, kode_barang: 'BRG-002', qr_content: 'BRG-002', nama_barang: 'Meja Kerja Ergonomis', kategori: 'Komponen', lokasi: 'Lantai 2', status: 'tersedia', kondisi: 'Baik', stok: 30, detail: 'Meja adjustable height 120x60cm', image: 'https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?w=500&auto=format&fit=crop&q=60' },
         { id: 3, kode_barang: 'BRG-003', qr_content: 'BRG-003', nama_barang: 'Projector Epson EB-X400', kategori: 'Elektronik', lokasi: 'Ruang Meeting', status: 'dipinjam', kondisi: 'Baik', stok: 5, detail: '3300 Lumens, HDMI, VGA', image: 'https://images.unsplash.com/photo-1535016120720-40c646be5580?w=500&auto=format&fit=crop&q=60' },
         { id: 4, kode_barang: 'BRG-004', qr_content: 'BRG-004', nama_barang: 'Bor Listrik Bosch GSB 550', kategori: 'Perkakas', lokasi: 'Gudang A', status: 'tersedia', kondisi: 'Baik', stok: 8, detail: 'Smart Drill 550W, 13mm', image: 'https://images.unsplash.com/photo-1504148455328-c376907d081c?w=500&auto=format&fit=crop&q=60' },
         { id: 5, kode_barang: 'BRG-005', qr_content: 'BRG-005', nama_barang: 'Solder Listrik Adjustable', kategori: 'Perkakas', lokasi: 'Ruang Lab', status: 'tersedia', kondisi: 'Baik', stok: 12, detail: 'Solder 60W Adjustable Temperature', image: 'https://images.unsplash.com/photo-1608962714022-ae9a04a6015b?w=500&auto=format&fit=crop&q=60' },
         { id: 6, kode_barang: 'BRG-006', qr_content: 'BRG-006', nama_barang: 'IC Mikrokontroler Atmega328', kategori: 'Komponen', lokasi: 'Gudang B', status: 'maintenance', kondisi: 'Rusak Ringan', stok: 46, detail: 'IC 8-bit AVR microcontroller', image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=500&auto=format&fit=crop&q=60' },
     ]);
 
-    const [kategoriList] = useState(['Elektronik', 'Mebel', 'Perkakas', 'Komponen', 'Alat Ukur', 'Jaringan']);
+    const [kategoriList] = useState(['Perkakas', 'Elektronik', 'Komponen']);
 
     const [logList, setLogList] = useState([
         { id: 1, pengguna: 'Baihaki', barang: 'Laptop ThinkPad X1 Carbon', waktu_pinjam: '2026-08-01 09:00', waktu_kembali: '2026-08-01 17:00', status: 'Selesai', keterangan: 'Peminjaman Laptop' },
